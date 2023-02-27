@@ -1,6 +1,50 @@
-#include <tensor.h>
+#ifndef TENSOR_H
+#define TENSOR_H
+#include <iostream>
+#include <cstddef>
+#include <stdexcept>
+#include <memory>
 
 namespace dltu {
+
+template<typename T>
+class Tensor {
+ public:
+  // Constructors
+  Tensor();
+  Tensor(const std::initializer_list<std::size_t>& shape);
+  Tensor(const Tensor<T>& other);
+  Tensor(Tensor<T>&& other) noexcept;
+
+  // Destructor
+  ~Tensor();
+
+  // Assignment operator
+  Tensor<T>& operator=(const Tensor<T>& other);
+  Tensor<T>& operator=(Tensor<T>&& other) noexcept;
+
+  // Accessors
+  T& operator[](std::size_t idx);
+  const T& operator[](std::size_t idx) const;
+  T& operator()(const std::initializer_list<std::size_t>& indices);
+  const T& operator()(const std::initializer_list<std::size_t>& indices) const;
+
+  // template<typename U>
+  //   friend std::ostream& operator<<(std::ostream& os, const Tensor<U>& tensor);
+
+  // Methods
+  Tensor<T> Transpose() const;
+
+ private:
+  // Private member variables
+  std::shared_ptr<T> data_;
+  std::size_t size_;
+  std::size_t ndim_;
+  std::unique_ptr<std::size_t[]> shape_;
+
+  // Private helper functions
+  std::size_t ComputeIndex(const std::initializer_list<std::size_t>& indices) const;
+};
 
 template<typename T>
 Tensor<T>::Tensor() : size_(0), ndim_(0) {}
@@ -86,40 +130,25 @@ std::size_t Tensor<T>::ComputeIndex(const std::initializer_list<std::size_t>& in
 {
     std::size_t index = 0;
     std::size_t offset = 1;
-    auto indices_it = indices.rbegin();
+    auto indices_it = indices.begin();
 
-    for (std::size_t i = 0; i < num_dimensions_; ++i)
+    for (std::size_t i = 0; i < ndim_; ++i)
     {
-        if (indices_it == indices.rend())
+        if (indices_it == indices.end())
         {
             throw std::out_of_range("Index out of range");
         }
         std::size_t dim = *indices_it++;
-        if (dim >= dimensions_[i])
+        if (dim >= shape_[i])
         {
             throw std::out_of_range("Index out of range");
         }
         index += offset * dim;
-        offset *= dimensions_[i];
+        offset *= shape_[i];
     }
 
     return index;
 }
 
-template<typename T>
-std::ostream& operator<<(std::ostream& os, const Tensor<T>& tensor)
-{
-    os << "[ ";
-    for (std::size_t i = 0; i < tensor.GetSize(); ++i)
-    {
-        os << tensor[i];
-        if (i != tensor.GetSize() - 1)
-        {
-            os << ", ";
-        }
-    }
-    os << " ]";
-    return os;
-}
-
-} //namespace dltu
+}  // namespace dltu
+#endif
