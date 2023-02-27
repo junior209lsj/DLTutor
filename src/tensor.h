@@ -26,6 +26,9 @@ class Tensor {
   T& operator()(const std::initializer_list<std::size_t>& indices);
   const T& operator()(const std::initializer_list<std::size_t>& indices) const;
 
+  template<typename U>
+    friend std::ostream& operator<<(std::ostream& os, const Tensor<U>& tensor);
+
   // Methods
   Tensor<T> Transpose() const;
 
