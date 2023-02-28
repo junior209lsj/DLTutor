@@ -25,7 +25,7 @@ $(BUILD_DIR)/%.o: $(TEST_DIR)/%.cc
 	$(CXX) $(CXXFLAGS) -I$(SRC_DIR) $< -c -o $@
 
 $(BUILD_DIR)/%: $(BUILD_DIR)/%.o
-	$(CXX) $< $(OBJS) -o $@ $(LIBS)
+	$(CXX) $< $(OBJS) -o $@.out $(LIBS)
 
 clean:
 	@rm -f $(OBJS) $(TEST_OBJS)
