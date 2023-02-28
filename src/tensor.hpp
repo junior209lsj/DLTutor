@@ -13,6 +13,7 @@ class Tensor {
   // Constructors
   Tensor();
   Tensor(const std::initializer_list<std::size_t>& shape);
+  Tensor(const std::initializer_list<std::size_t>& shape, const std::initializer_list<T>& data);
   Tensor(const Tensor<T>& other);
   Tensor(Tensor<T>&& other) noexcept;
 
@@ -59,6 +60,29 @@ Tensor<T>::Tensor(const std::initializer_list<std::size_t>& shape)
     shape_[i++] = dim;
   }
   data_ = std::shared_ptr<T[]>(new T[size_], std::default_delete<T[]>());
+}
+
+template <typename T>
+Tensor<T>::Tensor(const std::initializer_list<std::size_t> &shape, const std::initializer_list<T> &data)
+    : size_(0), ndim_(shape.size()), shape_(new std::size_t[ndim_]) {
+  size_ = 1;
+  std::size_t i = 0;
+
+  for (auto dim : shape) {
+    size_ *= dim;
+    shape_[i++] = dim;
+  }
+
+  if(size_ != data.size()) {
+    throw std::invalid_argument("Tensor size does not match data size");
+  }
+
+  data_ = std::shared_ptr<T[]>(new T[size_], std::default_delete<T[]>());
+
+  i = 0;
+  for (auto val: data) {
+    data_[i++] = val;
+  }
 }
 
 // 다른 텐서를 인자로 받아서 복사 생성
@@ -127,29 +151,26 @@ const T& Tensor<T>::operator()(const std::initializer_list<std::size_t>& indices
   return data_.get()[idx];
 }
 
-template<typename T>
-std::size_t Tensor<T>::ComputeIndex(const std::initializer_list<std::size_t>& indices) const
-{
-    std::size_t index = 0;
-    std::size_t offset = 1;
-    auto indices_it = indices.begin();
+template <typename T>
+std::size_t Tensor<T>::ComputeIndex(
+    const std::initializer_list<std::size_t>& indices) const {
+  if (indices.size() != ndim_) {
+    throw std::out_of_range("Invalid number of dimensions");
+  }
 
-    for (std::size_t i = 0; i < ndim_; ++i)
-    {
-        if (indices_it == indices.end())
-        {
-            throw std::out_of_range("Index out of range");
-        }
-        std::size_t dim = *indices_it++;
-        if (dim >= shape_[i])
-        {
-            throw std::out_of_range("Index out of range");
-        }
-        index += offset * dim;
-        offset *= shape_[i];
+  std::size_t idx = 0;
+  std::size_t multiplier = 1;
+  std::size_t dim_index = ndim_ - 1;
+
+  for(auto it = std::rbegin(indices); it != std::rend(indices); it++) {
+    if (*it >= shape_[dim_index]) {
+      throw std::out_of_range("Index out of range");
     }
+    idx += multiplier * (*it);
+    multiplier *= shape_[dim_index--];
+  }
 
-    return index;
+  return idx;
 }
 
 }  // namespace dltu
