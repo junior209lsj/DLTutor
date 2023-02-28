@@ -37,7 +37,7 @@ class Tensor {
 
  private:
   // Private member variables
-  std::shared_ptr<T> data_;
+  std::shared_ptr<T[]> data_;
   std::size_t size_;
   std::size_t ndim_;
   std::unique_ptr<std::size_t[]> shape_;
@@ -58,17 +58,19 @@ Tensor<T>::Tensor(const std::initializer_list<std::size_t>& shape)
     size_ *= dim;
     shape_[i++] = dim;
   }
-  data_ = std::shared_ptr<T>(new T[size_], std::default_delete<T[]>());
+  data_ = std::shared_ptr<T[]>(new T[size_], std::default_delete<T[]>());
 }
 
+// 다른 텐서를 인자로 받아서 복사 생성
 template<typename T>
 Tensor<T>::Tensor(const Tensor<T>& other)
     : size_(other.size_), ndim_(other.ndim_), shape_(new std::size_t[ndim_]) {
   std::copy(other.shape_.get(), other.shape_.get() + ndim_, shape_.get());
-  data_ = std::shared_ptr<T>(new T[size_], std::default_delete<T[]>());
+  data_ = std::shared_ptr<T[]>(new T[size_], std::default_delete<T[]>());
   std::copy(other.data_.get(), other.data_.get() + size_, data_.get());
 }
 
+// std::move(다른 텐서)를 인자로 받아 원래있던 텐서는 비우고, 그 내용을 새로운 텐서에 옮김
 template<typename T>
 Tensor<T>::Tensor(Tensor<T>&& other) noexcept
     : size_(std::exchange(other.size_, 0)), ndim_(std::exchange(other.ndim_, 0)),
