@@ -1,6 +1,6 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -O3 -Wall -Wextra
-LIBS = -pthread
+LIBS = -pthread -lgtest -lgtest_main
 
 SRC_DIR = ../src
 TEST_DIR = ../test
