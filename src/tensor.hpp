@@ -31,9 +31,8 @@ class Tensor {
   T& operator()(const std::initializer_list<std::size_t>& indices);
   const T& operator()(const std::initializer_list<std::size_t>& indices) const;
 
-  // template<typename U>
-  //   friend std::ostream& operator<<(std::ostream& os, const Tensor<U>&
-  //   tensor);
+  template <typename U>
+  friend std::ostream& operator<<(std::ostream& os, const Tensor<U>& tensor);
 
   // Methods
   Tensor<T> Transpose() const;
@@ -179,6 +178,20 @@ std::size_t Tensor<T>::ComputeIndex(
   }
 
   return idx;
+}
+
+template <typename U>
+std::ostream& operator<<(std::ostream& os, const Tensor<U>& tensor) {
+  os << "[";
+  for (std::size_t i = 0; i < tensor.size_; i++) {
+    os << tensor.data_[i];
+    if (i != tensor.size_ - 1) {
+      os << ", ";
+    }
+  }
+  os << "]";
+
+  return os;
 }
 
 }  // namespace dltu
