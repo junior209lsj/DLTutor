@@ -45,7 +45,8 @@ template <typename T> class Tensor {
     std::shared_ptr<T[]> data_;
     std::size_t size_;
     std::size_t ndim_;
-    std::unique_ptr<std::size_t[]> shape_;
+    // std::unique_ptr<std::size_t[]> shape_;
+    std::vector<std::size_t> shape_;
 
     // Private helper functions
     std::size_t
@@ -56,7 +57,7 @@ template <typename T> Tensor<T>::Tensor() : size_(0), ndim_(0) {}
 
 template <typename T>
 Tensor<T>::Tensor(const std::initializer_list<std::size_t> &shape)
-    : size_(0), ndim_(shape.size()), shape_(new std::size_t[ndim_]) {
+    : size_(0), ndim_(shape.size()), shape_(shape.begin(), shape.end()) {
     size_ = 1;
     std::size_t i = 0;
     for (auto dim : shape) {
@@ -69,7 +70,7 @@ Tensor<T>::Tensor(const std::initializer_list<std::size_t> &shape)
 template <typename T>
 Tensor<T>::Tensor(const std::initializer_list<std::size_t> &shape,
                   const std::initializer_list<T> &data)
-    : size_(0), ndim_(shape.size()), shape_(new std::size_t[ndim_]) {
+    : size_(0), ndim_(shape.size()), shape_(shape.begin(), shape.end()) {
     size_ = 1;
     std::size_t i = 0;
 
@@ -93,8 +94,8 @@ Tensor<T>::Tensor(const std::initializer_list<std::size_t> &shape,
 // 다른 텐서를 인자로 받아서 복사 생성
 template <typename T>
 Tensor<T>::Tensor(const Tensor<T> &other)
-    : size_(other.size_), ndim_(other.ndim_), shape_(new std::size_t[ndim_]) {
-    std::copy(other.shape_.get(), other.shape_.get() + ndim_, shape_.get());
+    : size_(other.size_), ndim_(other.ndim_), shape_(std::vector<std::size_t>(other.shape_)) {
+    // std::copy(other.shape_.get(), other.shape_.get() + ndim_, shape_.get());
     data_ = std::shared_ptr<T[]>(new T[size_], std::default_delete<T[]>());
     std::copy(other.data_.get(), other.data_.get() + size_, data_.get());
 }
@@ -112,8 +113,9 @@ template <typename T> Tensor<T> &Tensor<T>::operator=(const Tensor<T> &other) {
     if (this != &other) {
         ndim_ = other.ndim_;
         size_ = other.size_;
-        shape_.reset(new std::size_t[ndim_]);
-        std::copy(other.shape_.get(), other.shape_.get() + ndim_, shape_.get());
+        // shape_.reset(new std::size_t[ndim_]);
+        // std::copy(other.shape_.get(), other.shape_.get() + ndim_, shape_.get());
+        shape_ = std::vector<std::size_t>(other.shape_);
         data_.reset(new T[size_]);
         std::copy(other.data_.get(), other.data_.get() + size_, data_.get());
     }
