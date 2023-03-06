@@ -5,6 +5,8 @@
 #include <memory>
 #include <stdexcept>
 
+#include "tensor_ops.hpp"
+
 namespace dltu {
 
 template <typename T>
@@ -51,13 +53,13 @@ class Tensor {
 
   std::size_t Size() const;
   std::size_t Ndim() const;
-
+  std::vector<std::size_t> Shape() const;
+  
  private:
   // Private member variables
   std::shared_ptr<T[]> data_;
   std::size_t size_;
   std::size_t ndim_;
-  // std::unique_ptr<std::size_t[]> shape_;
   std::vector<std::size_t> shape_;
 
   // Private helper functions
@@ -70,8 +72,7 @@ Tensor<T>::Tensor() : size_(0), ndim_(0) {}
 
 template <typename T>
 Tensor<T>::Tensor(const std::vector<std::size_t> &shape)
-    : size_(std::accumulate(shape.begin(), shape.end(), 1,
-                            std::multiplies<std::size_t>())),
+    : size_(ops::ComputeSize(shape)),
       ndim_(shape.size()),
       shape_(shape) {
   data_ = std::shared_ptr<T[]>(new T[size_], std::default_delete<T[]>());
@@ -80,8 +81,7 @@ Tensor<T>::Tensor(const std::vector<std::size_t> &shape)
 template <typename T>
 Tensor<T>::Tensor(const std::vector<std::size_t> &shape,
                   const std::vector<T> &data)
-    : size_(std::accumulate(shape.begin(), shape.end(), 1,
-                            std::multiplies<std::size_t>())),
+    : size_(ops::ComputeSize(shape)),
       ndim_(shape.size()),
       shape_(shape) {
   if (size_ != data.size()) {
@@ -165,23 +165,7 @@ const T &Tensor<T>::operator()(
 template <typename T>
 std::size_t Tensor<T>::ComputeIndex(
     const std::initializer_list<std::size_t> &indices) const {
-  if (indices.size() != ndim_) {
-    throw std::out_of_range("Invalid number of dimensions");
-  }
-
-  std::size_t idx = 0;
-  std::size_t multiplier = 1;
-  std::size_t dim_index = ndim_ - 1;
-
-  for (auto it = std::rbegin(indices); it != std::rend(indices); it++) {
-    if (*it >= shape_[dim_index]) {
-      throw std::out_of_range("Index out of range");
-    }
-    idx += multiplier * (*it);
-    multiplier *= shape_[dim_index--];
-  }
-
-  return idx;
+  return ops::ComputeIndex(shape_, indices);
 }
 
 template <typename U>
@@ -200,22 +184,7 @@ std::ostream &operator<<(std::ostream &os, const Tensor<U> &tensor) {
 
 template <typename T>
 Tensor<T> Tensor<T>::Transpose() {
-  if (ndim_ <= 1) {
-    return *this;
-  } else if (ndim_ == 2) {
-    Tensor<T> result({shape_[1], shape_[0]});
-    for (std::size_t i = 0; i < shape_[0]; i++) {
-      for (std::size_t j = 0; j < shape_[1]; j++) {
-        result({j, i}) = data_.get()[ComputeIndex({i, j})];
-      }
-    }
-
-    return result;
-  } else {  // 3차원 이상 텐서는 맨 마지막 2개 차원 transpose
-    // TODO: 개발하기
-    // return result;
-    return *this;
-  }
+  return ops::Transpose(*this);
 }
 
 template <typename T>
@@ -226,6 +195,11 @@ std::size_t Tensor<T>::Size() const {
 template <typename T>
 std::size_t Tensor<T>::Ndim() const {
   return ndim_;
+}
+
+template <typename T>
+std::vector<std::size_t> Tensor<T>::Shape() const {
+  return shape_;
 }
 
 }  // namespace dltu
