@@ -35,7 +35,7 @@ class Tensor {
   friend std::ostream& operator<<(std::ostream& os, const Tensor<U>& tensor);
 
   // Methods
-  Tensor<T> Transpose() const;
+  Tensor<T> Transpose();
 
  private:
   // Private member variables
@@ -192,6 +192,11 @@ std::ostream& operator<<(std::ostream& os, const Tensor<U>& tensor) {
   os << "]";
 
   return os;
+}
+
+template <typename T>
+Tensor<T> Tensor<T>::Transpose() {
+
 }
 
 }  // namespace dltu
