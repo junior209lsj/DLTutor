@@ -194,9 +194,22 @@ std::ostream& operator<<(std::ostream& os, const Tensor<U>& tensor) {
   return os;
 }
 
-template <typename T>
-Tensor<T> Tensor<T>::Transpose() {
+template <typename T> Tensor<T> Tensor<T>::Transpose() {
+  if (ndim_ <= 1) {
+    return *this;
+  } else if (ndim_ == 2) {
+    Tensor<T> result({shape_[1], shape_[0]});
+    for (std::size_t i = 0; i < shape_[0]; i++) {
+      for (std::size_t j = 0; j < shape_[1]; j++) {
+          result({j, i}) = data_.get()[ComputeIndex({i, j})];
+      }
+    }
 
+    return result;
+  } else { // 3차원 이상 텐서는 맨 마지막 2개 차원 transpose
+  // TODO: 개발하기
+    return *this;
+  }
 }
 
 }  // namespace dltu
