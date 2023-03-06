@@ -201,7 +201,28 @@ template <typename T> Tensor<T> Tensor<T>::Transpose() {
         return result;
     } else { // 3차원 이상 텐서는 맨 마지막 2개 차원 transpose
              // TODO: 개발하기
-        return *this;
+        std::unique_ptr<std::size_t[]> transposed_shape =
+            std::unique_ptr<std::size_t[]>(new std::size_t[ndim_]);
+        std::copy(shape_.get(), shape_.get() + ndim_, transposed_shape.get());
+        std::swap(transposed_shape[ndim_ - 1], transposed_shape[ndim_ - 2]);
+        Tensor<T> result(transposed_shape.get(), ndim_);
+        // std::vector<std::size_t> index(ndim_, 0);
+        // for (std::size_t i = 0; i < size_; i++) {
+        //     result.data_[ComputeIndex(std::initializer_list<std::size_t>(index.begin(), index.end()))] = data_[i];
+        //     index.back()++; // 마지막 차원 인덱스 증가
+        //     for (int j = ndim_ - 1; j > 0;
+        //          j--) { // 마지막 차원에서부터 이전 차원까지
+        //         if (index[j] == shape_[j]) { // 현재 차원 인덱스가 차원 크기와
+        //                                      // 같으면 다음 차원의 인덱스 증가
+        //             index[j] = 0;
+        //             index[j - 1]++;
+        //         } else {
+        //             break; // 현재 차원 인덱스가 차원 크기보다 작으면 다음
+        //                    // 차원으로 넘어가기
+        //         }
+        //     }
+        // }
+        return result;
     }
 }
 
