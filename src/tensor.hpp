@@ -101,9 +101,9 @@ Tensor<T>::Tensor(const Tensor<T>& other)
 // 텐서에 옮김
 template <typename T>
 Tensor<T>::Tensor(Tensor<T>&& other) noexcept
-    : size_(std::exchange(other.size_, 0)),
+    : data_(std::move(other.data_)),
+      size_(std::exchange(other.size_, 0)),
       ndim_(std::exchange(other.ndim_, 0)),
-      data_(std::move(other.data_)),
       shape_(std::move(other.shape_)) {}
 
 template <typename T>
