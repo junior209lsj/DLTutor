@@ -17,6 +17,25 @@ TEST(Tensor, index_computation) {
     EXPECT_EQ(8, t({1, 1, 1}));
 }
 
+TEST(Tensor, substitution) {
+    dltu::Tensor<float> t({2, 2}, {1, 2, 3, 4});
+    dltu::Tensor<float> t_copy = t;
+    
+    for(std::size_t i = 0; i < 2; i++) {
+        for(std::size_t j = 0; j < 2; j++) {
+            EXPECT_EQ(t({i, j}), t_copy({i, j}));
+        }
+    }
+
+    dltu::Tensor<float> t_moved(std::move(t));
+    
+    for(std::size_t i = 0; i < 2; i++) {
+        for(std::size_t j = 0; j < 2; j++) {
+            EXPECT_EQ(t_copy({i, j}), t_moved({i, j}));
+        }
+    }
+}
+
 TEST(Tensor, transpose_1d) {
     dltu::Tensor<float> t({4}, {2, 4, 6, 8});
     dltu::Tensor<float> tt = t.Transpose();
