@@ -1,4 +1,5 @@
 #include <iostream>
+#include <random>
 #include <tensor.hpp>
 
 #include <gtest/gtest.h>
@@ -25,16 +26,24 @@ TEST(Tensor, transpose_1d) {
 }
 
 TEST(Tensor, transpose_2d) {
-  dltu::Tensor<float> t({3, 2}, {1, 2, 3, 4, 5, 6});
+  dltu::Tensor<float> t({17, 21});
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0.0, 1.0);
+
+  for(std::size_t i = 0; i < 17; i++) {
+    for(std::size_t j = 0; j < 21; j++) {
+      t({i, j}) = dis(gen);
+    }
+  }
+
   dltu::Tensor<float> tt = t.Transpose();
 
-  EXPECT_EQ(1, tt({0, 0}));
-  EXPECT_EQ(3, tt({0, 1}));
-  EXPECT_EQ(5, tt({0, 2}));
-  EXPECT_EQ(2, tt({1, 0}));
-  EXPECT_EQ(4, tt({1, 1}));
-  EXPECT_EQ(6, tt({1, 2}));
-
+  for (std::size_t i = 0; i < 17; i++) {
+    for (std::size_t j = 0; j < 21; j++) {
+      EXPECT_FLOAT_EQ(t({i, j}), tt({j, i}));
+    }
+  }
 }
 
 int main(int argc, char **argv) {
