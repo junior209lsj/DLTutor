@@ -37,6 +37,9 @@ template <typename T> class Tensor {
     // Methods
     Tensor<T> Transpose();
 
+    std::size_t Size() const;
+    std::size_t Ndim() const;
+
   private:
     // Private member variables
     std::shared_ptr<T[]> data_;
@@ -201,11 +204,11 @@ template <typename T> Tensor<T> Tensor<T>::Transpose() {
         return result;
     } else { // 3차원 이상 텐서는 맨 마지막 2개 차원 transpose
              // TODO: 개발하기
-        std::unique_ptr<std::size_t[]> transposed_shape =
-            std::unique_ptr<std::size_t[]>(new std::size_t[ndim_]);
-        std::copy(shape_.get(), shape_.get() + ndim_, transposed_shape.get());
-        std::swap(transposed_shape[ndim_ - 1], transposed_shape[ndim_ - 2]);
-        Tensor<T> result(transposed_shape.get(), ndim_);
+        // std::unique_ptr<std::size_t[]> transposed_shape =
+        //     std::unique_ptr<std::size_t[]>(new std::size_t[ndim_]);
+        // std::copy(shape_.get(), shape_.get() + ndim_, transposed_shape.get());
+        // std::swap(transposed_shape[ndim_ - 1], transposed_shape[ndim_ - 2]);
+        // Tensor<T> result(transposed_shape.get(), ndim_);
         // std::vector<std::size_t> index(ndim_, 0);
         // for (std::size_t i = 0; i < size_; i++) {
         //     result.data_[ComputeIndex(std::initializer_list<std::size_t>(index.begin(), index.end()))] = data_[i];
@@ -222,8 +225,18 @@ template <typename T> Tensor<T> Tensor<T>::Transpose() {
         //         }
         //     }
         // }
-        return result;
+        // return result;
     }
+}
+
+template<typename T>
+std::size_t Tensor<T>::Size() const {
+  return size_;
+}
+
+template<typename T>
+std::size_t Tensor<T>::Ndim() const {
+  return ndim_;
 }
 
 } // namespace dltu
